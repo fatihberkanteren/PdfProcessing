@@ -29,9 +29,9 @@ def extract_text_from_pdf(pdf_path):
         return f"Hata: {e}"
 
 def summarize_text_with_qwen(text, message):
-    """Qwen modeli ile istenileni yapar."""
+    """Qwen modeli ile özetleme yapar."""
     try:
-        truncated_text = text[:2000] 
+        truncated_text = text[:2000]  # Metni sınırlayarak API'ye gönder
         prompt = f"{message}:\n\n{truncated_text}"
         response = llm.complete(prompt)
         return response.text.strip()
