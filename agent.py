@@ -28,22 +28,21 @@ def extract_text_from_pdf(pdf_path):
     except Exception as e:
         return f"Hata: {e}"
 
-def summarize_text_with_qwen(text, message):
-    """Qwen modeli ile özetleme yapar."""
+def process_text_with_qwen(text, message):
+    """Qwen modeli ile kullanıcının verdiği isteğe göre işlem yapar."""
     try:
-        truncated_text = text[:2000]  # Metni sınırlayarak API'ye gönder
-        prompt = f"{message}:\n\n{truncated_text}"
+        prompt = f"{message}:\n\n{text[:2000]}"
         response = llm.complete(prompt)
         return response.text.strip()
     except Exception as e:
-        return f"Prompt hatası: {e}"
+        return f"İşlem hatası: {e}"
 
 def process_pdf(pdf_path, message):
-    """PDF'i okur, metni çıkarır ve özetler."""
+    """PDF'i okur, metni çıkarır ve kullanıcının isteğine göre işler."""
     text = extract_text_from_pdf(pdf_path)
     if text.startswith("Hata:") or not text:
         return "Bu PDF boş veya okunamıyor."
-    return summarize_text_with_qwen(text, message)
+    return process_text_with_qwen(text, message)
 
 if __name__ == "__main__":
     pdf_files = get_pdf()
@@ -52,5 +51,5 @@ if __name__ == "__main__":
     else:
         answer = input("Ne yapmak istiyorsunuz? ")
         for pdf_path in pdf_files:
-            summary = process_pdf(pdf_path, answer)
-            print(f"\nİstek gerçekleştirildi: {summary}")
+            result = process_pdf(pdf_path, answer)
+            print(f"\nİstek gerçekleştirildi: {result}")
