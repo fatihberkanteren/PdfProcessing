@@ -48,55 +48,24 @@ def extract_text_from_pdf(pdf_filename):
     except Exception as e:
         return f"Hata: {e}"
 
-
-def summarize_text(text):
-    """Qwen modeli ile metni özetler."""
-    try:
-        truncated_text = text[:2000]  # API sınırlarına göre kesildi
-        prompt = f"Bu metni özetle:\n\n{truncated_text}"
-        response = llm.run(prompt)
-        return response
-    except Exception as e:
-        return f"Hata: {e}"
-
-
-def translate_text(text, target_language="English"):
-    """Metni hedef dile çevirir (varsayılan: İngilizce)."""
-    try:
-        truncated_text = text[:2000]
-        prompt = f"Bu metni {target_language} diline çevir:\n\n{truncated_text}"
-        response = llm.run(prompt)
-        return response
-    except Exception as e:
-        return f"Hata: {e}"
-
-
-def answer_questions(text, question):
-    """Kullanıcının metinle ilgili sorduğu soruya cevap verir."""
-    try:
-        truncated_text = text[:2000]
-        prompt = f"Aşağıdaki metne dayanarak şu soruya cevap ver: {question}\n\n{truncated_text}"
-        response = llm.run(prompt)
-        return response
-    except Exception as e:
-        return f"Hata: {e}"
-
 tools = [
     Tool(name="PDF Listeleme", func=get_pdf, description="Klasördeki PDF dosyalarını listeler."),
     Tool(name="PDF Okuma", func=extract_text_from_pdf, description="Belirtilen bir PDF dosyasındaki metni okur."),
-    Tool(name="Metin Özetleme", func=summarize_text, description="Metni özetler."),
-    Tool(name="Çeviri", func=translate_text, description="Metni başka bir dile çevirir."),
-    Tool(name="Soru-Cevap", func=answer_questions, description="Metne dayalı sorulara cevap verir."),
 ]
 
 class AgentState(BaseModel):
     input: str
 
+
 def my_agent(state: AgentState):
     """LangGraph için ana Agent fonksiyonu."""
     user_input = state.input
-    response = llm.run(user_input)
-    return {"output": response}
+    try:
+        response = llm.invoke(user_input)
+        return {"output": response}
+    except Exception as e:
+        return {"output": f"⚠️ Hata oluştu: {e}"}
+
 
 graph = StateGraph(AgentState)
 graph.add_node("agent", my_agent)
